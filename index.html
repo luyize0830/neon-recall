@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#04060c">
+<title>黑历史：霓虹回档 · NEON RECALL</title>
+<meta name="description" content="赛博朋克分支互动剧情。72 小时内，决定你的黑历史是被删除、被承认，还是被改写。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Share+Tech+Mono&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="L0">
+
+<div id="stage">
+  <div id="mood"></div>
+  <div id="grid"></div>
+  <div id="noise"></div>
+  <div id="tear"></div>
+  <div id="vig"></div>
+  <div id="flash"></div>
+
+  <!-- ===== HUD (FR-03) ===== -->
+  <header id="hud" hidden>
+    <div id="clockbox">
+      <div class="lb">COUNTDOWN</div>
+      <div id="clock">72:00:00</div>
+    </div>
+    <div id="stats"></div>
+    <div id="sidebox">
+      <button class="chip" id="btn-frag" title="黑历史碎片档案">F 0/7</button>
+      <button class="chip" id="btn-rewind" style="color:var(--mag);border-color:rgba(255,46,136,.4);background:rgba(255,46,136,.09)" title="时间回档">RW 3</button>
+      <button class="iconbtn" id="btn-save">存档</button>
+      <button class="iconbtn" id="btn-gal">图鉴</button>
+      <button class="iconbtn" id="btn-set">设置</button>
+      <button class="iconbtn" id="btn-title">标题</button>
+    </div>
+  </header>
+
+  <!-- ===== 场景区 (FR-01) + 选项区 (FR-02) ===== -->
+  <main id="main" hidden>
+    <div id="scene">
+      <div id="chlbl"></div>
+      <div id="speaker"></div>
+      <div id="text"></div>
+      <div id="hint">点击文本区跳过打字 · 数字键 1–6 选择 · ESC 菜单</div>
+    </div>
+    <div id="opts"></div>
+  </main>
+
+  <!-- ===== 标题页 ===== -->
+  <div id="title">
+    <div class="kick">NEO-KOWLOON // 2087 &nbsp;·&nbsp; CONSENSUS LAYER &nbsp;·&nbsp; <b>BRANCHING NARRATIVE</b></div>
+    <h1 data-t="黑历史">黑历史</h1>
+    <div class="sub">霓虹回档 · NEON RECALL</div>
+    <p class="tag">
+      你是持牌记忆剪辑师 V-07。一条未签名讯息刚弹进视网膜：<br>
+      有人在 72 小时后，把你的黑历史广播给全城四十七万块屏幕。
+    </p>
+    <div class="menu">
+      <button class="btn mg big" id="m-new">接入神经接口 · 新游戏</button>
+      <button class="btn big" id="m-cont" disabled>继续 · CONTINUE</button>
+      <div class="row" style="justify-content:center;margin-top:6px">
+        <button class="btn" id="m-load">读取存档</button>
+        <button class="btn vi" id="m-gal">结局图鉴</button>
+        <button class="btn ac" id="m-frag">碎片档案</button>
+        <button class="btn" id="m-set">设置</button>
+      </div>
+    </div>
+    <div class="prog" id="m-prog"></div>
+    <div class="warn">内容提示：本作涉及记忆篡改、非自愿医疗与精神操控等虚构桥段，仅呈现后果与证据，不含具体实施过程。建议 16 岁以上游玩。</div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="wipe"></div>
+<div id="blackout"></div>
+<div id="tip"></div>
+
+<!-- ===== 覆盖层 ===== -->
+<div class="ov" id="ov-confirm"><div class="box narrow">
+  <div class="box-t" id="cf-t">CONFIRM</div>
+  <div class="box-h" id="cf-h">确认</div>
+  <p id="cf-b"></p>
+  <div class="row end" style="margin-top:18px">
+    <button class="btn" id="cf-n">取消</button>
+    <button class="btn mg" id="cf-y">确认</button>
+  </div>
+</div></div>
+
+<div class="ov" id="ov-end"><div class="box" id="end-box"></div></div>
+
+<div class="ov" id="ov-gal"><div class="box">
+  <div class="box-t">ENDING ARCHIVE</div>
+  <div class="box-h">结局图鉴 <span class="dim" id="gal-cnt" style="font-size:14px"></span></div>
+  <p class="dim">未解锁格显示无剧透线索。真结局以酸绿描边标记，隐藏结局首次达成前不显示称号。</p>
+  <div class="gal" id="gal"></div>
+  <div id="gal-detail" style="margin-top:16px"></div>
+  <div class="row end" style="margin-top:20px"><button class="btn" data-close>关闭</button></div>
+</div></div>
+
+<div class="ov" id="ov-frag"><div class="box">
+  <div class="box-t">FRAGMENT ARCHIVE</div>
+  <div class="box-h">黑历史碎片档案 <span class="dim" id="frag-cnt" style="font-size:14px"></span></div>
+  <p class="dim">碎片分布于互斥分支。修复需 <b style="color:var(--mag)">150 CR</b> 且 <b style="color:var(--acid)">SYNC ≥ 30</b>。已修复碎片跨周目保留，并计入 FRAGMENT——集齐 7 枚是解锁真结局的必要条件。</p>
+  <div class="frags" id="frags"></div>
+  <div id="fdetail"></div>
+  <div class="row end" style="margin-top:20px"><button class="btn" data-close>关闭</button></div>
+</div></div>
+
+<div class="ov" id="ov-rewind"><div class="box">
+  <div class="box-t">TEMPORAL REWIND</div>
+  <div class="box-h">时间回档</div>
+  <p class="dim" id="rw-info"></p>
+  <div class="tl"><div class="rail"></div><div class="nodes" id="rw-tl"></div></div>
+  <div id="rw-msg" style="font-family:var(--mono);font-size:12px;color:var(--dim);min-height:22px;margin:10px 0 4px"></div>
+  <p class="dim">代价：每次回档 <b style="color:var(--mag)">−80 CR</b> 与 <b style="color:var(--acid)">1 次回档余量</b>。状态完整还原至检查点快照。位于不可逆选择之前的检查点将被锁定。</p>
+  <div class="row end" style="margin-top:16px"><button class="btn" data-close>关闭</button></div>
+</div></div>
+
+<div class="ov" id="ov-save"><div class="box">
+  <div class="box-t">SAVE / LOAD</div>
+  <div class="box-h">存档槽</div>
+  <p class="dim">自动槽在进入检查点时覆盖写入，不可删除。手动槽覆盖前会二次确认。</p>
+  <div class="slots" id="slots"></div>
+  <div class="row end" style="margin-top:20px"><button class="btn" data-close>关闭</button></div>
+</div></div>
+
+<div class="ov" id="ov-set"><div class="box">
+  <div class="box-t">SETTINGS</div>
+  <div class="box-h">设置</div>
+  <div class="set" id="set-body"></div>
+  <h4>数据</h4>
+  <p class="dim">全部数据仅存储在本机浏览器，不上传任何玩家路径与结局数据。</p>
+  <div class="row">
+    <button class="btn mg" id="set-wipe">清除全部本地数据</button>
+    <span class="dim" id="set-store"></span>
+  </div>
+  <div class="row end" style="margin-top:20px"><button class="btn" data-close>关闭</button></div>
+</div></div>
+
+<div class="ov" id="ov-info"><div class="box narrow">
+  <div class="box-t">HOW TO PLAY</div>
+  <div class="box-h">操作说明</div>
+  <p><b style="color:var(--cyan)">鼠标 / 触摸</b>：点击选项推进剧情，点击文本区跳过打字机。</p>
+  <p><b style="color:var(--cyan)">键盘</b>：<code style="font-family:var(--mono);color:var(--acid)">1</code>–<code style="font-family:var(--mono);color:var(--acid)">6</code> 选择选项 · <code style="font-family:var(--mono);color:var(--acid)">Space</code> 跳过打字 · <code style="font-family:var(--mono);color:var(--acid)">Esc</code> 开关菜单 / 关闭覆盖层 · <code style="font-family:var(--mono);color:var(--acid)">Tab</code> 在选项间移动。</p>
+  <p><b style="color:var(--cyan)">四维状态</b>：曝光度上升是坏事，信誉 / 记忆完整度 / 信用点下降是坏事。任一变量触底或触顶会立刻触发硬结局。</p>
+  <p><b style="color:var(--cyan)">故障等级</b>：画面撕裂与色差强度对应你的危险程度，L0 静默 → L3 崩解。可在设置中关闭。</p>
+  <div class="row end" style="margin-top:18px"><button class="btn" data-close>明白了</button></div>
+</div></div>
+
+<script src="story.js"></script>
+<script src="engine.js"></script>
+</body>
+</html>
